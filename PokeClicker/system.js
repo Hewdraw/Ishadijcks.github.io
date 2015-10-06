@@ -247,7 +247,10 @@ var player = {
 	upgradeList: [],
 	gymBadges: 0,
 	version: version,
-	totalCaught: 0
+	totalCaught: 0,
+	berryList: [],
+	plotList: [],
+	plotsUnlocked: 2
 }
 
 var curEnemy = {
@@ -554,6 +557,10 @@ var load = function(){
 	if (typeof savegame.gymBadges !== "undefined") player.gymBadges = savegame.gymBadges;
 	if (typeof savegame.totalCaught !== "undefined") player.totalCaught = savegame.totalCaught;
 	if (typeof savegame.version !== "undefined") player.version = savegame.version;
+	if (typeof savegame.berryList !== "undefined") player.berryList = savegame.berryList;
+	if (typeof savegame.plotList !== "undefined") player.plotList = savegame.plotList;
+	if (typeof savegame.plotsUnlocked !== "undefined") player.plotsUnlocked = savegame.plotsUnlocked;
+
 	
 	
     var link = document.createElement('link');
