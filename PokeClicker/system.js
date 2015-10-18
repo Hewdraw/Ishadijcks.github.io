@@ -268,6 +268,8 @@ var curEnemy = {
 
 $(document).ready(function(){
  
+	hideScreens();
+	$("#mainScreen").show();
 	$('#changeLogModal').modal('show');
  
 	if(localStorage.getItem("player") != null){
@@ -398,6 +400,16 @@ $(document).ready(function(){
 	
 
 	// Navbar Button controllers
+	$("body").on('click',"#mainButton", function(){
+		hideScreens();
+		$("#mainScreen").show();		
+	})
+	
+	$("body").on('click',"#gardenButton", function(){
+		hideScreens();
+		$("#gardenScreen").show();		
+	})
+	
 	$("body").on('click',"#badgeButton", function(){
 		$("#badgeModal").modal("show");
 		for (var i = 1; i<=player.gymBadges; i++){
@@ -432,6 +444,11 @@ $(document).ready(function(){
 	log("Have fun!");
 
 });
+
+var hideScreens = function(){
+	$("#mainScreen").hide();
+	$("#gardenScreen").hide();
+}
 
 var sortChange = function() {
     var selectBox = document.getElementById("sortBox");
@@ -844,6 +861,7 @@ var generateLegendary = function(){
 		}
 		return false;
 	}
+	
 }
 
 var testLegendary = function(tries){

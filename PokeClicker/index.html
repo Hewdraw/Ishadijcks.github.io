@@ -29,63 +29,68 @@
 		</head>
 <body>	
 	<div class="container">
-	<br>	
-		<div class="row">
-	
-			<div class="col-sm-1" id="pokemons">
-			
-			<select id="sortBox"  onchange="sortChange()">
-				<option> Sort by... </option>
-				<option value ="id">Pokedex #</option>
-				<option value ="name">Name</option>
-				<option value ="attack">Attack</option>
-				<option value ="level">Level</option>
-				<option value ="time">Order captured</option>
-				<option value ="catchRate">Catch Rate</option>
-			</select>
-			 Name
-			<div id="caughtPokemon"></div>
-			</div>
-			<div class="col-sm-1" id="AttackCaughtPokemon"> Attack</div>
-			<div class="col-sm-1" id="LevelCaughtPokemon"> Level</div>
-
-
-			
-			
-			<div class="col-sm-4 col-md-offset-1" id="currentEnemy"> 
-				<span id="routeLeft" class="glyphicon glyphicon-arrow-left"></span>
-				<span id="currentRoute"></span> 
-				<span id="routeRight" class="glyphicon glyphicon-arrow-right"></span>
+	<br>
+		<div id="mainScreen">
+			<div class="row">
+		
+				<div class="col-sm-1" id="pokemons">
 				
-				<div id="enemyInfo"></div>
-				<span id="catchDisplay"></span>
-				<div class="progress">
-					<div id="healthBar" class="progress-bar progress-bar-danger" style="width: 0%">
-						<span class="sr-only"></span>
-					</div>
+				<select id="sortBox"  onchange="sortChange()">
+					<option> Sort by... </option>
+					<option value ="id">Pokedex #</option>
+					<option value ="name">Name</option>
+					<option value ="attack">Attack</option>
+					<option value ="level">Level</option>
+					<option value ="time">Order captured</option>
+					<option value ="catchRate">Catch Rate</option>
+				</select>
+				 Name
+				<div id="caughtPokemon"></div>
 				</div>
+				<div class="col-sm-1" id="AttackCaughtPokemon"> Attack</div>
+				<div class="col-sm-1" id="LevelCaughtPokemon"> Level</div>
+
+
 				
-				<span id="healthDisplay"></span>
-			
+				
+				<div class="col-sm-4 col-md-offset-1" id="currentEnemy"> 
+					<span id="routeLeft" class="glyphicon glyphicon-arrow-left"></span>
+					<span id="currentRoute"></span> 
+					<span id="routeRight" class="glyphicon glyphicon-arrow-right"></span>
+					
+					<div id="enemyInfo"></div>
+					<span id="catchDisplay"></span>
+					<div class="progress">
+						<div id="healthBar" class="progress-bar progress-bar-danger" style="width: 0%">
+							<span class="sr-only"></span>
+						</div>
+					</div>
+					
+					<span id="healthDisplay"></span>
+				
+				</div>
+				<div class="col-sm-1 col-md-offset-1" id="statBox">Stats</div>
+				<div class="col-sm-1" id="statBoxStats"></div>
 			</div>
-			<div class="col-sm-1 col-md-offset-1" id="statBox">Stats</div>
-			<div class="col-sm-1" id="statBoxStats"></div>
+			
+			
+				<div id="upgradeBox" class="col-sm-2 col-md-offset-9">Upgrades!</div>
+			
+		</div>		
+			<div id="console" class="col-sm-6 col-md-offset-3 footer navbar-fixed-bottom"></div>
+			<div id="navBar" class="col-sm-6 col-md-offset-3 footer navbar-fixed-bottom">
+				<button id="mainButton" class="btn-info">Main</button>
+				<button id="gardenButton" class="btn-success">Garden</button>
+				<button id="badgeButton" class="btn-success">Badges</button>
+				<button id="pokedexButton" class="btn-danger">Pokedex</button>
+				<button id="mapButton" class="btn-info">Map</button>
+				<button id="changeLogButton" class="btn-info">Changelog</button>
+				<button id="resetButton" class="btn-danger">Reset</button>
+			</div>
+		
+		<div id="gardenScreen">
+		asd
 		</div>
-		
-		
-			<div id="upgradeBox" class="col-sm-2 col-md-offset-9">Upgrades!</div>
-		
-		
-		<div id="console" class="col-sm-6 col-md-offset-3 footer navbar-fixed-bottom"></div>
-		<div id="navBar" class="col-sm-6 col-md-offset-3 footer navbar-fixed-bottom">
-			<button id="badgeButton" class="btn-success">Badges</button>
-			<button id="pokedexButton" class="btn-danger">Pokedex</button>
-			<button id="mapButton" class="btn-info">Map</button>
-			<button id="changeLogButton" class="btn-info">Changelog</button>
-			<button id="resetButton" class="btn-danger">Reset</button>
-		</div>
-		
-		
 		
 		
 		
