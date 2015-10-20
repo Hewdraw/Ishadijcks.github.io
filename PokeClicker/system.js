@@ -154,6 +154,10 @@ var pokemonList = [
 {id: 151, name: "Mew", catchRate: 45, evolution: null, evoLevel: null, evolved: 0, type: "psychic", attack: 100, route:100, health:100, levelType: "medium slow", experience: 150  },
 ];
 
+var berryList = [ "Cheri Berry","Chesto Berry","Pecha Berry","Rawst Berry","Aspear Berry","Leppa Berry","Oran Berry","Persim Berry","Lum Berry","Sitrus Berry"];
+var selectedPlot = "";
+var selectedBerry = "";
+
 var alreadyUpgrade = function(name){
 	for( var i = 0; i<player.upgradeList.length;i++){
 		if( player.upgradeList[i].name == name){
@@ -248,7 +252,9 @@ var player = {
 	gymBadges: 0,
 	version: version,
 	totalCaught: 0,
-	berryList: [],
+	berryList: [0,0,0,0,0,0,0,0,0,0],
+	berryChance: 1,
+	farmingTokens: 0,
 	plotList: [],
 	plotsUnlocked: 2
 }
@@ -270,7 +276,7 @@ $(document).ready(function(){
  
 	hideScreens();
 	$("#mainScreen").show();
-	$('#changeLogModal').modal('show');
+	//$('#changeLogModal').modal('show');
  
 	if(localStorage.getItem("player") != null){
 		load();
@@ -398,6 +404,21 @@ $(document).ready(function(){
 		updateCaughtList();
 	})
 	
+	$("body").on('click',".berryPlot",function(){
+		$(".berryPlot").removeClass("selectedPlot");
+		selectedPlot = this.id.substr(4,this.id.length);
+		$("#plot"+selectedPlot).addClass("selectedPlot");
+		updatePlants();
+	})
+	
+	$("body").on('click',".berries",function(){
+
+		$(".berries").removeClass("selectedBerry");
+		selectedBerry = this.id.substr(5,this.id.length);
+		//alert(selectedBerry);
+		$("#berry"+selectedBerry).addClass("selectedBerry");
+		updatePlants();
+	})
 
 	// Navbar Button controllers
 	$("body").on('click',"#mainButton", function(){
@@ -478,6 +499,23 @@ var sortChange = function() {
 	updateCaughtList();
 }
 
+var updatePlants = function(){
+	if(selectedPlot !="" && selectedBerry !=""){
+		
+		plant(selectedBerry,selectedPlot);
+		
+		selectedPlot = "";
+		selectedBerry = "";
+		$(".berryPlot").removeClass("selectedPlot");
+		$(".berries").removeClass("selectedBerry");
+		
+	}
+}
+
+var plant = function(berry,plot){
+	player.berryList[selectedBerry]--;
+	log("Planted a "+berryList[berry]+" on plot "+plot);
+}
 
 // Update all functions and save
 var updateAll = function(){
@@ -487,6 +525,8 @@ var updateAll = function(){
 	updateCaughtList();
 	updateRoute();
 	updateUpgrades();
+	updateBerries();
+	updatePlants();
 	save();
 }
 
@@ -577,6 +617,8 @@ var load = function(){
 	if (typeof savegame.berryList !== "undefined") player.berryList = savegame.berryList;
 	if (typeof savegame.plotList !== "undefined") player.plotList = savegame.plotList;
 	if (typeof savegame.plotsUnlocked !== "undefined") player.plotsUnlocked = savegame.plotsUnlocked;
+	if (typeof savegame.berryChance !== "undefined") player.berryChance = savegame.berryChance;
+	if (typeof savegame.farmingTokens !== "undefined") player.farmingTokens = savegame.farmingTokens;
 
 	
 	
@@ -586,6 +628,25 @@ var load = function(){
     link.href = 'images/'+player.starter+'.png';
     document.getElementsByTagName('head')[0].appendChild(link);
 }		
+
+			// Berry functions
+
+var generateBerry = function(){
+	if(player.route > 5){
+		if (Math.random()*100 < 100*player.berryChance){
+			for(var i = 0; i<berryList.length; i++){
+				if(Math.random()*100 < 50){
+				log("You have found a "+berryList[i] +"!");
+					player.berryList[i]++;
+					return;
+				}
+			}
+
+			player.berryList[berryList.length-1]++;
+		}
+	}
+}
+
 
 			// Leveling functions
 
@@ -667,6 +728,8 @@ var enemyDefeated = function(){
 		updateRoute();
 		log("You earned $" + Math.floor(money) + "!");
 
+		generateBerry();
+		
 		var catchRate = curEnemy.catchRate + player.catchBonus-10;
 		$("#catchDisplay").html("Catch chance: "+Math.min(100,catchRate));
 		
@@ -970,6 +1033,15 @@ var updateStats = function(){
 	$("#statBoxStats").html("<br><br>$"+player.money+"<br>"+player.clickAttack*player.clickMultiplier+"<br>"+player.attack*player.attackMultiplier+"<br>"+player.expMultiplier.toFixed(2)+"x<br>"+player.catchBonus+"%<br>"+player.catchTime/1000+" sec<br>"+player.route+"<br>"+player.totalCaught);	
 }
 
+var updateBerries = function(){
+$("#berryListNumbers").html("");
+	for (var i = 0; i<berryList.length; i++){
+		
+		$("#berryListNumbers").append(player.berryList[i]+"<br>");
+	}
+	$("#tokenText").remove();
+	$("#berryList").append("<span id=tokenText ><br>Farming tokens \t\t\t\t"+ player.farmingTokens+"</span>");
+}
 
 
 var updateRoute = function(){

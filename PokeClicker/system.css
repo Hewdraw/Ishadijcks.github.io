@@ -1,3 +1,50 @@
+#plotList{
+	display:inline-block;
+	width:80%;
+	float:right;
+}
+
+.selectedPlot{
+	border: 1px solid #66BA5B !important;
+}
+
+.selectedBerry{
+	border: 1px solid #66BA5B !important;
+}
+
+#berryListNumbers{
+	float:right;
+	position:relative;
+	left:-150px;
+}
+
+#berryList{
+	float:left;
+}
+
+#berryOverview{
+	height:508px;
+	width:200px;
+	border:1px solid black;
+	width:20%;
+	float:left;
+	margin-right:3px;
+}
+
+#berryText{
+	text-align:center;
+}
+
+.berryPlot{
+	height:250px;
+	width:250px;
+	border:1px solid black;
+	display:inline-block;
+	margin-left:3px;
+	margin-right:3px;
+	margin-bottom:3px;
+}
+
 #pokedexModal{
 	width:100% !important;
 }
