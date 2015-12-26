@@ -277,7 +277,7 @@ $(document).ready(function(){
 	hideScreens();
 	$("#mainScreen").show();
 	//$('#changeLogModal').modal('show');
- 
+	
 	if(localStorage.getItem("player") != null){
 		load();
 		generatePokemon(player.route);
@@ -463,7 +463,7 @@ $(document).ready(function(){
 	log("Buy upgrades to increase your catch rate");
 	log("Defeat 5 pokemon on a route to get access to the next");
 	log("Have fun!");
-
+	initPlots();
 });
 
 var hideScreens = function(){
@@ -512,9 +512,36 @@ var updatePlants = function(){
 	}
 }
 
+var initPlots = function(){
+	for(var i = 0; i<10; i++){
+	player.plotList[i] = new plot(i,"","",false);
+	}
+}
+
+var plot = function(id,seed,timeLeft,unlocked){
+	this.id = id;
+	this.seed = seed;
+	this.timeLeft = timeLeft;
+	this.unlocked = unlocked;
+	this.tick = function(){
+		if(timeLeft >0){
+			timeLeft--;
+		}
+	}
+	this.ready = function(){
+		return timeLeft == 0;
+	}
+	this.unlock = function(){
+		this.unlocked = true
+	}
+}
+
 var plant = function(berry,plot){
+	if(player.plotList[plot].unlocked()){
 	player.berryList[selectedBerry]--;
 	log("Planted a "+berryList[berry]+" on plot "+plot);
+	//player.plotList[i] = 
+	}
 }
 
 // Update all functions and save
