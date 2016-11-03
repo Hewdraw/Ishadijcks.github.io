@@ -1,4 +1,4 @@
-var version = "0.71"
+var version = "0.9"
 var inProgress = 1;
 var canCatch = 1;
 var attackInterval;
@@ -53,7 +53,38 @@ var player = {
 	questDifficulty: 1,
 	lastSeen: new Date().getDate(),
 	eggList: [null, null, null, null],
-	eggSlots: 1
+	eggSlots: 0,
+	totalBred: 0,
+	shinyPoints: 0,
+	mineInventory: [],
+	mineCoins: 0,
+	curMine: {
+        itemSelected: 1,
+        grid: [],
+        sizeX: 25,
+        sizeY: 12,
+        rewardGrid: [],
+        itemsFound: 0,
+        itemsBuried: 0,
+        rewardNumbers: [],
+        maxItems: 3,
+        layersCleared: 0,
+        totalItemsFound: 0,
+        energy: 50,
+        energyTick: 60,
+        maxEnergy: 50,
+        energyRegen: 60,
+        energyGain: 3,
+        energyRefills: 1,
+        chisselEnergy: 1,
+        hammerEnergy: 3,
+        maxEnergyUpgrades: 0,
+        energyRegenUpgrades: 0,
+        maxItemsUpgrades: 0,
+        energyGainUpgrades: 0,
+        dailyDeals: [],
+    },
+	oakItemsEquipped: []
 }
 
 var curEnemy = {
@@ -72,11 +103,15 @@ var curEnemy = {
 
 
 $(document).ready(function(){
+	if(!(document.domain === "ishadijcks.github.io" || document.domain === "")){
+		$("#siteModal").modal('show')
+	}
 	initTypeEffectiveness();
 	//$('#changeLogModal').modal('show');
 
 	if(localStorage.getItem("player") != null){
-		load();
+		var savegame = JSON.parse(localStorage.getItem("player"));
+		load(savegame);
 		generatePokemon(player.route);
 	}
 
@@ -168,7 +203,7 @@ $(document).ready(function(){
 		}
 	});
 
-	$("body").on('click',".useItemButton", function(){
+	$("body").on('click touchstart',".useItemButton", function(){
 		var id = this.id.substring(4);
 		activateItem(id);
 	});
@@ -225,6 +260,8 @@ $(document).ready(function(){
 		updateCaughtList();
 	})
 
+
+
 	$("body").on('click',"#AttackCaughtPokemon", function(){
 		player.caughtPokemonList.sort(compareByAttack);
 		updateCaughtList();
@@ -241,13 +278,13 @@ $(document).ready(function(){
 		moveToRoute(routeNumber);
 	})
 
-	$("svg").on('click',"rect", function(){
+	$("svg").on('click touchstart',"rect", function(){
 		var id = this.id;
 		routeNumber = idToRoute(id);
 		moveToRoute(routeNumber);
 	})
 
-	$("svg").on('click',".city", function(){
+	$("svg").on('click touchstart',".city", function(){
 		var id = this.id;
 		moveToTown(id);
 	})
@@ -260,7 +297,7 @@ $(document).ready(function(){
 		loadGym(id);
 	})
 
-	$("body").on('click',".dungeon", function(){
+	$("body").on('click touchstart',".dungeon", function(){
 		var id = this.id;
 		id = id.slice(0, -8);
 		loadDungeon(id);
@@ -272,7 +309,7 @@ $(document).ready(function(){
 		loadShop(id);
 	})
 
-	$("body").on('click',".dungeonRoom", function(){
+	$("body").on('click touchstart',".dungeonRoom", function(){
 		var id = parseInt(this.id.substring(4));
 		moveToRoom(id);
 	})
@@ -316,6 +353,11 @@ $(document).ready(function(){
 		showCurQuest();
 	})
 
+	$("body").on('click',"#mineButton", function(){
+		$("#mineModal").modal("show");
+		showCurMine();
+	})
+
 		// Navbar Button controllers
 	$("body").on('click',"#shardButton", function(){
 		showShardModal();
@@ -330,29 +372,23 @@ $(document).ready(function(){
 		breedPokemon(this.dataset.pokemon);
 	})
 
+	$("body").on('click',".mineSquare", function(){
+		squareClicked(this.dataset.i, this.dataset.j);
+	})
+
 	$("body").on('click',".shopItem", function(){
 		buyShopItem(this.dataset.itemname);
 	})
 
 	$("body").on('click',"#pokedexButton", function(){
-		showPokedex();
 		$("#pokedexModal").modal("show");
-
+		showPokedex();
 	})
 
 	$("body").on('click',".oakItem", function(){
 		var id = this.id;
 		var itemId = id.substr(id.length - 1);
 		activateOakItem(itemId);
-	})
-
-	$("body").on('click',"#resetButton", function(){
-		var input = prompt("Are you sure you want to delete your savefile?, enter 6 if you are!","9");
-		if (input == 6){
-			canSave = 0;
-			localStorage.clear();
-			location.reload();
-		}
 	})
 
 	$("body").on('click',"#changeLogButton", function(){
@@ -379,6 +415,7 @@ $(document).ready(function(){
 	initPossibleEggs();
 	showCurQuest();
 	showEggs();
+	generateDailyDeals();
 });
 
 
@@ -521,8 +558,6 @@ var gainMoney = function(money, message){
 // All pokemon you have gain exp
 var gainExp = function(exp,level,trainer){
 	if(!isNaN(exp)){
-		console.log(level);
-		console.log(exp);
 		var multiplier = player.expMultiplier;
 		var oakBonus = 1;
 		if(isActive("Exp Share")){
@@ -540,8 +575,6 @@ var gainExp = function(exp,level,trainer){
 
 		var expTotal = Math.floor((exp * trainerBonus * oakBonus * level * multiplier * totalMagnitude) / 7);
 		//realgame formula: (trainerbonus * baseexp * luckyeggbonus * affectionbonus * level * tradedbonus * unevolvedbonus) / (7 * outofbattlepenalty)
-		console.log(expTotal)
-
 		for( var i = 0; i<player.caughtPokemonList.length; i++){
 			var pokemonLevel = experienceToLevel(player.caughtPokemonList[i].experience, player.caughtPokemonList[i].levelType);
 			player.caughtPokemonList[i].experience+= expTotal;
@@ -648,6 +681,7 @@ var capturePokemon = function(name, shiny){
 			if (pokemonList[i].name == name){
 				pokemonList[i].timeStamp = Math.floor(Date.now() / 1000);
 				pokemonList[i].shiny = shiny;
+				pokemonList[i].experience = 0;
 				player.caughtPokemonList.push(pokemonList[i]);
 				if(shiny){
 					$.notify("You have caught a shiny "+ name +"!", "succes")
@@ -665,6 +699,12 @@ var capturePokemon = function(name, shiny){
 		if(shiny){
 			for( var i = 0; i<player.caughtPokemonList.length; i++){
 				if(player.caughtPokemonList[i].name == name){
+					if(player.caughtPokemonList[i].shiny){
+						player.shinyPoints++;
+					}
+					if(player.caughtPokemonList[i].shiny === 0 || player.caughtPokemonList[i].shiny === undefined) {
+						player.caughtPokemonList[i].timeStamp = Math.floor(Date.now() / 1000);
+					}
 					player.caughtPokemonList[i].shiny = 1;
 					$.notify("You have caught a shiny "+ name +"!", "succes")
 					progressQuest('captureShinies', "none" , 1);
@@ -863,4 +903,12 @@ var testLegendary = function(tries){
 	console.log("Mew: "+mew);
 	console.log("Mewtwo: "+two);
 	console.log("False: "+fail);
+}
+
+var numberWithCommas = function(x){
+	return Number(x).toLocaleString('en');
+}
+
+var numberNoCommas = function(x){
+	return parseFloat(String(x).replace(/,/g, ''));
 }
