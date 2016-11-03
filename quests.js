@@ -29,13 +29,13 @@ var startQuest = function(quest){
 		case "defeatPokemonRoute":
 		//Route to defeat Pokémon on.
 			player.curQuest.type2 = Math.max(1, Math.min(25, Math.floor(5* Math.random()) + (quest.difficulty )*5));
-			player.curQuest.description = "Defeat " + player.curQuest.amount + " Pokemon on route " + player.curQuest.type2;
+			player.curQuest.description = "Defeat " + numberWithCommas(player.curQuest.amount) + " Pokemon on route " + player.curQuest.type2;
 			break;
 
 		case "capturePokemonRoute":
 		//Route to capture Pokémon on.
 			player.curQuest.type2 = Math.max(1, Math.min(25, Math.floor(5* Math.random()) + (quest.difficulty )*5));
-			player.curQuest.description = "Capture " + player.curQuest.amount + " Pokemon on route " + player.curQuest.type2;
+			player.curQuest.description = "Capture " + numberWithCommas(player.curQuest.amount) + " Pokemon on route " + player.curQuest.type2;
 			break;
 		case "captureShinies":
 			player.curQuest.type2 = "none";
@@ -59,23 +59,27 @@ var startQuest = function(quest){
 			break;
 		case "defeatPokemon":
 			player.curQuest.type2 = Math.floor(Math.random()*pokemonList.length) + 1;
-			player.curQuest.description = "Defeat " + player.curQuest.amount + " " + getPokemonById(player.curQuest.type2).name;
+			player.curQuest.description = "Defeat " + numberWithCommas(player.curQuest.amount) + " " + getPokemonById(player.curQuest.type2).name;
 			break;
 		case "gainMoney":
 			player.curQuest.type2 = "none";
-			player.curQuest.description = "Gain " + player.curQuest.amount + " money!";
+			player.curQuest.description = "Gain " + numberWithCommas(player.curQuest.amount) + " money!";
 			break;
 		case "gainExp":
 			player.curQuest.type2 = "none";
-			player.curQuest.description = "Gain " + player.curQuest.amount + " exp!";
+			player.curQuest.description = "Gain " + numberWithCommas(player.curQuest.amount) + " exp!";
 			break;
 		case "gainTokens":
 			player.curQuest.type2 = "none";
-			player.curQuest.description = "Gain " + player.curQuest.amount + " dungeon tokens!";
+			player.curQuest.description = "Gain " + numberWithCommas(player.curQuest.amount) + " dungeon tokens!";
 			break;
 		case "gainShards":
 			player.curQuest.type2 = "none";
-			player.curQuest.description = "Gain " + player.curQuest.amount + " shards (any type)";
+			player.curQuest.description = "Gain " + numberWithCommas(player.curQuest.amount) + " shards (any type)";
+			break;
+		case "breedPokemon":
+			player.curQuest.type2 = "none";
+			player.curQuest.description = "Hatch " + player.curQuest.amount + " eggs";
 			break;
 	}
 	showCurQuest();
@@ -91,6 +95,7 @@ var progressQuest = function(type, type2,  amount){
 			showCurQuest();
 			if(player.curQuest.progress >= player.curQuest.amount && !player.curQuest.notified){
 				$.notify("Your random quest is ready to be completed!", "success");
+				notifyMe("You can complete your quest");
 				player.curQuest.notified = 1;
 			}
 		}
@@ -146,6 +151,12 @@ addQuest('gainShards', 'Gain x shards', EASY, 25, 50, 5)
 addQuest('gainShards', 'Gain x shards', MEDIUM, 50, 100, 10)
 addQuest('gainShards', 'Gain x shards', HARD, 100, 150, 20)
 addQuest('gainShards', 'Gain x shards', IMPOSSIBLE, 250, 500, 40)
+
+// addQuest('breedPokemon', 'Breed x Pokemon', EASY, 1, 3, 5)
+// addQuest('breedPokemon', 'Breed x Pokemon', MEDIUM, 3, 7, 11)
+addQuest('breedPokemon', 'Breed x Pokemon', HARD, 3, 7, 25)
+addQuest('breedPokemon', 'Breed x Pokemon', IMPOSSIBLE, 5, 10, 52);
+
 
 
 
@@ -252,17 +263,17 @@ var showCurQuest = function(){
 	html += "<div id='questTop'>";
 	html += 	"<h2 style='text-align:center; padding:5px'>" + player.curQuest.description + "</h2><div id='difficultyBlock'>" + questDifficultyName[player.curQuest.difficulty] + "</div>";
 	html += 	"<br>";
-	html += 	"<p style='text-align:center; margin-bottom:15px'>" + Math.min(player.curQuest.progress,player.curQuest.amount) + "/" + player.curQuest.amount + "</p>";
+	html += 	"<p style='text-align:center; margin-bottom:15px'>" + numberWithCommas(Math.min(player.curQuest.progress,player.curQuest.amount)) + "/" + numberWithCommas(player.curQuest.amount) + "</p>";
 	html += 	"<div class='row' id='questProgressRow'>";
 	html += 		"<div class='progress' id='questProgress'>"
-	html += 			"<div class='progress-bar progress-bar-danger' id='healthBar' style='width: " + Math.min(player.curQuest.progress,player.curQuest.amount) /player.curQuest.amount*100 + "%'>"
+	html += 			"<div class='progress-bar progress-bar-success' id='healthBar' style='width: " + Math.min(player.curQuest.progress,player.curQuest.amount) /player.curQuest.amount*100 + "%'>"
 	html += 				"<span class='sr-only'></span>";
 	html += 			"</div>";
 	html += 		"</div>";
 	html += 		"<p>All progress needs to be made after the quest has started.</p>";
 	html +=		"</div>";
 	html += 	"<div class='row' style='width:80%;margin-top:15px;'>"
-	html += 		"<p>Reward: " + player.curQuest.reward + " Quest points</p>";
+	html += 		"<p>Reward: " + numberWithCommas(player.curQuest.reward) + " Quest points</p>";
 	html += 	"</div>";
 	html += 	"<div class='row' style='width:80%;margin-top:15px;'>"
 	if(questCompleted()){
@@ -273,16 +284,16 @@ var showCurQuest = function(){
 	html += 	"</div>";
 	html += 	"<div class='row' style='width:80%;margin-top:15px;'>"
 	if(canSkipQuestQuest()){
-		html += 		"<button onClick='skipQuestQuest()' class='btn btn-danger'>Skip Quest</button> (" + getSkipPriceQuest() + " points)";
+		html += 		"<button onClick='skipQuestQuest()' class='btn btn-danger'>Skip Quest</button> (" + numberWithCommas(getSkipPriceQuest()) + " points)";
 	} else {
-		html += 		"<button class='btn btn-danger disabled'>Skip Quest</button> (" + getSkipPriceQuest() + " points)";
+		html += 		"<button class='btn btn-danger disabled'>Skip Quest</button> (" + numberWithCommas(getSkipPriceQuest()) + " points)";
 	}
 	html += 	"</div>";
 	html += 	"<div class='row' style='width:80%;margin-top:15px;'>"
 	if(canSkipQuestMoney()){
-		html += 		"<button onClick='skipQuestMoney()' class='btn btn-danger'>Skip Quest</button> ($" + getSkipPriceMoney() + ")";
+		html += 		"<button onClick='skipQuestMoney()' class='btn btn-danger'>Skip Quest</button> ($" + numberWithCommas(getSkipPriceMoney()) + ")";
 	} else {
-		html += 		"<button class='btn btn-danger disabled'>Skip Quest</button> (" + getSkipPriceMoney() + " points)";
+		html += 		"<button class='btn btn-danger disabled'>Skip Quest</button> ($" + numberWithCommas(getSkipPriceMoney()) + ")";
 	}
 	
 	html += 		"</div>";
@@ -290,8 +301,8 @@ var showCurQuest = function(){
 	html += "</div>";
 	html += "<div class= 'row' style='width:80%;margin-top:50px;'>"
 	// html += 	"<p>Quest difficulty: " + player.questDifficulty + "</p>";
-	html += 	"<p>Quest points: " + player.questPoints + "</p>";
-	html += 	"<p>Quests  completed: " + player.questCompletedTotal + "</p>";
+	html += 	"<p>Quest points: " + numberWithCommas(player.questPoints) + "</p>";
+	html += 	"<p>Quests  completed: " + numberWithCommas(player.questCompletedTotal) + "</p>";
 	html += 	"<p>Completed today: " + player.questCompletedToday + "</p>";
 	html += 	"<p>Maximum in 1 day: " + player.questCompletedDailyMax + "</p>";
 	html += "</div>";

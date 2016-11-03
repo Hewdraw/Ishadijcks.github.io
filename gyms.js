@@ -153,16 +153,21 @@ var Champion = function(){
     pokemonList.push(GymPokemon("Pidgeot", 30600, 59));
     pokemonList.push(GymPokemon("Alakazam", 36720, 57));
     pokemonList.push(GymPokemon("Rhydon", 42835, 59));
-    pokemonList.push(GymPokemon("Arcanine", 45895, 61));
     if( player.starter === "Charmander"){
+    	pokemonList.push(GymPokemon("Arcanine", 42835, 59));
+    	pokemonList.push(GymPokemon("Exeggutor", 45895, 61));
     	pokemonList.push(GymPokemon("Blastoise", 61190, 63));
 	}
 
     if( player.starter === "Squirtle"){
+    	pokemonList.push(GymPokemon("Gyarados", 42835, 59));
+    	pokemonList.push(GymPokemon("Arcanine", 45895, 61));
     	pokemonList.push(GymPokemon("Venusaur", 61190, 63));
 	}
 
     if( player.starter === "Bulbasaur"){
+    	pokemonList.push(GymPokemon("Exeggutor", 42835, 59));
+    	pokemonList.push(GymPokemon("Gyarados", 45895, 61));
     	pokemonList.push(GymPokemon("Charizard", 61190, 63));
 	}
     return Gym("Champion", "Indigo Plateau Gym", pokemonList, "Champion", 10000, 12);
@@ -225,7 +230,7 @@ var updateGym = function(){
     if (curEnemy.alive){
 
     	if(alreadyCaughtShiny(curEnemy.name)){
-    		 $("#gymEnemyInfo").html("<br>"+curEnemy.name+" <img id=alreadyCaughtImage src=images/shinypokemon/star.png><br><img id=gymEnemy src=images/pokemon/"+curEnemy.id+".png>");
+    		 $("#gymEnemyInfo").html("<br>"+curEnemy.name+" <img id=alreadyCaughtImage src=images/shinyPokeball.PNG><br><img id=gymEnemy src=images/pokemon/"+curEnemy.id+".png>");
     	} else if(alreadyCaught(curEnemy.name)){
             $("#gymEnemyInfo").html("<br>"+curEnemy.name+" <img id=alreadyCaughtImage src=images/Pokeball.PNG><br><img id=gymEnemy src=images/pokemon/"+curEnemy.id+".png>");
         }
@@ -312,8 +317,12 @@ var showGymDefeated = function(first, town){
 		html += "Prize money: " + currentGym.moneyReward+ " x 10% = $"+ currentGym.moneyReward/10;
 	}
 
+	console.log(town);
+	console.log(currentGym);
 	if(!e4){
-		html += "<div class='row'><button class='gym leftTownButton btn btn-primary col-sm-2' id='"+town+" Gym'>Retry!</button></div>"
+		html += "<div class='row'><button class='gym leftTownButton btn btn-primary col-sm-2' id='"+town+" Gym'>Retry!</button></div>";
+	} else {
+		html += "<div class='row'><button class='gym leftTownButton btn btn-primary col-sm-2' id='"+currentGym.leaderName+" Gym'>Retry!</button></div>";
 	}
 
 
@@ -353,6 +362,6 @@ var spawnGymPokemon = function(pokemonIndex){
 
 var showGymBadges = function() {
 	for (var i = 0; i<player.gymBadges.length; i++){
-			$("#"+player.gymBadges[i]+"Badge").fadeTo("slow",1);
-		}
+		$("#"+player.gymBadges[i]+"Badge").fadeTo("slow",1);
+	}
 }

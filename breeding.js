@@ -3,14 +3,15 @@ var Egg = function(type, steps, pokemon){
 		type:type,
 		steps:steps,
 		progress: 0,
-		pokemon:pokemon
+		pokemon:pokemon,
+		notified: 0,
 	}
 	return temp;
 }
 
 var possibleEggs = Array.apply(null, Array(17)).map(Number.prototype.valueOf,0);
 
-var eggSlotPrice = [0, 25000, 100000, 1000000];
+var eggSlotPrice = [0, 500, 1000, 2500];
 
 var initPossibleEggs = function(){
 	var fireEggs = ["Charmander", "Vulpix", "Growlithe", "Ponyta"];
@@ -51,10 +52,25 @@ var gainPokemonEgg = function(pokemonName){
 	gainEgg(Egg(pokemon.type, getSteps(pokemonName), pokemonName));
 }
 
+var gainMineEgg = function(itemId){
+    sellMineItem(itemId);
+    var type = "amber";
+    var pokemonName = "Aerodactyl";
+    if(itemId === 1){
+        type = "helix";
+        pokemonName = "Omanyte";
+    } else if(itemId === 2){
+        type = "dome";
+        pokemonName = "Kabuto";
+    }
+	var pokemon = getPokemonByName(pokemonName);
+	gainEgg(Egg(type, getSteps(pokemonName), pokemonName));
+}
+
 var getSteps = function(pokemonName){
 	var pokemon = getPokemonByName(pokemonName);
 	if( pokemon.steps === undefined){
-		return 2000;
+		return 500;
 	} else {
 		return pokemon.steps;
 	}
@@ -74,6 +90,7 @@ var gainEgg = function(egg){
 			return;
 		}
 	}
+	save();
 }
 
 var releasePokemon = function(pokemonName){
@@ -90,6 +107,9 @@ var releasePokemon = function(pokemonName){
 }
 
 var breedPokemon = function(pokemonName){
+	if(pokemonName === "Farfetch"){
+		pokemonName = "Farfetch'd";
+	}
 	for(var i = 0; i<player.eggSlots; i++){
 		if(player.eggList[i] === null){
 			var pokemon = getCaughtPokemonByName(pokemonName);
@@ -99,7 +119,7 @@ var breedPokemon = function(pokemonName){
 			}
 			showMom();
 			$.notify("You start breeding...", "success");
-			$.notify("You release your " + pokemonName, "success");
+			$.notify("You leave your " + pokemonName + " with your mom", "success");
 			save();
 			return;
 		}
@@ -108,7 +128,19 @@ var breedPokemon = function(pokemonName){
 	save();
 }
 
+var breedSlotLeft = function(){
+	for(var i = 0; i<player.eggSlots; i++){
+		if(player.eggList[i] === null){
+			return true;
+		}
+	}
+	return false;
+}
+
 var progressEgg = function(amount){
+	if(isActive("Blaze Cassette")){
+		amount *= getOakItemBonus("Blaze Cassette");
+	}
 	for(var i = 0; i<player.eggList.length; i++){
 		if(player.eggList[i] !== null){
 			player.eggList[i].progress += amount;
@@ -123,23 +155,29 @@ var checkEggHatch = function(){
 		var egg = player.eggList[i];
 		if(egg !== null){
 			if( egg.progress >= egg.steps){
-				hatchEgg(egg);
-				player.eggList[i] = null;
+				if(!egg.notify){
+					egg.notify = 1;
+					$.notify("One of your eggs is ready to hatch!", "success");
+					notifyMe("One of your eggs is ready to hatch!");
+				}
 			}
 		}
 	}
 }
 
-var hatchEgg = function(egg){
-	$.notify("You hatched a " + egg.pokemon, 'success');
+var hatchEgg = function(i){
+	var egg = player.eggList[i];
+	player.eggList[i] = null;
+	$.notify("You hatched " + egg.pokemon, 'success');
 	progressQuest('breedPokemon', "none", 1);
-	capturePokemon(egg.pokemon, generateStoneShiny());
+	capturePokemon(egg.pokemon, generateEggShiny());
+	player.totalBred++;
 	showEggs();
 }
 
 var buyEggSlot = function(i){
 	if(canBuyEggSlot(i)){
-		player.money -= eggSlotPrice[i];
+		player.questPoints -= eggSlotPrice[i];
 		player.eggSlots++;
 		showEggs();
 		save();	
@@ -147,24 +185,32 @@ var buyEggSlot = function(i){
 }
 
 var canBuyEggSlot = function(i){
-	return player.money >= eggSlotPrice[i];
+	return player.questPoints >= eggSlotPrice[i];
 }
 
 var showEggs = function(){
 	for(var i = 0; i<player.eggList.length; i++){
 		var html = ""
 		if(player.eggList[i] !== null){
-			html += "<img title='" + player.eggList[i].type + "' class='egg tooltipUp' src=images/breeding/egg" + player.eggList[i].type + ".png>";
-			html += "<div class='progress eggProgress' style='width: 80%; margin:auto'>";
+			if( player.eggList[i].progress >= player.eggList[i].steps){
+				html += "<img style='cursor:pointer;' onClick='hatchEgg(" + i + ")' title='" + player.eggList[i].type + "' class='egg tooltipUp' src=images/breeding/egg" + player.eggList[i].type + ".png>"
+			} else{
+				html += "<img title='" + player.eggList[i].type + "' class='egg tooltipUp' src=images/breeding/egg" + player.eggList[i].type + ".png>";
+			}
+			if(player.eggList[i].progress < player.eggList[i].steps){
+				html += "<div title='" + player.eggList[i].progress + "/" + player.eggList[i].steps + "' class='progress eggProgress tooltipEggProgress' style='width: 80%; margin:auto'>";
+			} else {
+				html += "<div title='Click on the egg to hatch it!' class='progress eggProgress tooltipEggProgress' style='width: 80%; margin:auto'>";
+			}
 			html += 	"<div class='progress-bar progress-bar-success' style='width: " + player.eggList[i].progress/player.eggList[i].steps*100 + "%'>";
 			html += 		"<span class='sr-only'></span>";
 			html +=		"</div>";
 			html += "</div>";
 		} else {
 			if( i == player.eggSlots && canBuyEggSlot(i)){
-				html += "<br><button class='egg btn btn-info' onClick='buyEggSlot("+i+")'>$" + eggSlotPrice[i] + "</p><p>Egg slot</p>";
-			} else if (i > player.eggSlots){
-				html += "<br><button class='egg btn btn-info disabled'>$" + eggSlotPrice[i] + "</p><p>Egg slot</p>";
+				html += "<br><button class='egg btn btn-info' onClick='buyEggSlot("+i+")'>" + eggSlotPrice[i] + " QP</p><p>Egg slot</p>";
+			} else if (i >= player.eggSlots){
+				html += "<br><button class='egg btn btn-info disabled'>" + eggSlotPrice[i] + " QP</p><p>Egg slot</p>";
 			}
 		}
 		$("#egg"+i).html(html)
@@ -173,10 +219,11 @@ var showEggs = function(){
 	$(".tooltipUp").tooltipster({
 		position: "top"
 	});
-}
 
-var pikachuEgg = Egg('electric', 1000, "Pikachu");
-gainEgg(pikachuEgg);
+	$(".tooltipEggProgress").tooltipster({
+		position: "bottom"
+	});
+}
 
 var showMom = function(){
 	var html = "<div class='row'>";
@@ -204,4 +251,18 @@ var showMom = function(){
 var canBreed = function(pokemon){
 	var pokemonLevel = experienceToLevel(pokemon.experience, pokemon.levelType);
 	return pokemonLevel >= 100 && !pokemon.shiny;
+}
+
+var generateEggShiny = function(){
+	var chance = 1024;
+	if(isActive("Shiny Charm")){
+		chance /= getOakItemBonus("Shiny Charm");
+	}
+	var number = Math.floor(Math.random()*chance) + 1;
+
+	if(number <= 1){
+		console.log("Shiny!!!");
+		return 1;
+	}
+	return 0;
 }
